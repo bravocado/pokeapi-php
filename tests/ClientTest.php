@@ -1,5 +1,5 @@
 <?php
-use Pokeapi\Client;
+use Pokeapi\PokeApi;
 
 class ClientTest extends \PHPUnit_Framework_TestCase
 {
@@ -8,10 +8,10 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     */
     public function testPokedex()
     {
-        $client = new Client();
-        $pokedex = $client->get('pokedex');
+        $client = new PokeApi();
+        $pokedex = $client->get('pokedex', 'national');
         $body = json_decode($pokedex->getBody()->getContents());
-        $this->assertEquals($body->objects[0]->name, 'national');
+        $this->assertEquals($body->name, 'national');
     }
 
     /**
@@ -19,10 +19,10 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     */
     public function testPokemon()
     {
-        $client = new Client();
+        $client = new PokeApi();
         $pokemon = $client->get('pokemon', 1);
         $body = json_decode($pokemon->getBody()->getContents());
-        $this->assertEquals($body->name, 'Bulbasaur');
+        $this->assertEquals($body->name, 'bulbasaur');
     }
 
     /**
@@ -30,9 +30,27 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     */
     public function testType()
     {
-        $client = new Client();
+        $client = new PokeApi();
         $type = $client->get('type', 1);
         $body = json_decode($type->getBody()->getContents());
-        $this->assertEquals($body->name, 'Normal');
+        $this->assertEquals($body->name, 'normal');
+    }
+
+    /**
+     * @vcr 404.json
+     */
+    public function testError()
+    {
+        $client = new PokeApi();
+        $response = $client->get('pokemon', 999);
+        $statusCode = json_decode($response->getStatusCode());
+        if ($statusCode == 404)
+        {
+            echo "400-error test passed!";
+        }
+        else
+        {
+            echo "400-error test not passed!";
+        }
     }
 }
